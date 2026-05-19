@@ -28,3 +28,7 @@ test_*.py
 
 cloud_info.txt
 Screenshots/
+
+
+.pem
+.csv
