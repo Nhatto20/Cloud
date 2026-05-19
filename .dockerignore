@@ -1,0 +1,29 @@
+# Secrets
+.env
+*.env
+
+# Markdown / docs
+*.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual envs
+.venv/
+venv/
+
+# Test files
+test_*.py
+
+# Git
+.git/
+.gitignore
+
+# Editor
+.vscode/
+.idea/
+
+cloud_info.txt

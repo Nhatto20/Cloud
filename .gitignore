@@ -1,0 +1,21 @@
+# Environment variables and secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Local OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+
+*.md
+!README.md
+cloud_info.txt
