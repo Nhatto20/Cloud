@@ -1,0 +1,57 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Bước 1: Checkout code ──
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Bước 2: SSH vào EC2 và deploy ──
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "=== [1/5] Navigating to project directory ==="
+            cd ~/Cloud
+
+            echo "=== [2/5] Pulling latest code from GitHub ==="
+            git pull origin main
+
+            echo "=== [3/5] Updating .env file ==="
+            cat > .env << 'ENVEOF'
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=ap-southeast-1
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+            ENVEOF
+
+            echo "=== [4/5] Building Docker image on EC2 ==="
+            docker build -t fastapi-app:latest .
+
+            echo "=== [5/5] Restarting container ==="
+            docker stop fastapi-app 2>/dev/null || true
+            docker rm fastapi-app 2>/dev/null || true
+            docker run -d \
+              --name fastapi-app \
+              --restart unless-stopped \
+              -p 8000:8000 \
+              --env-file .env \
+              fastapi-app:latest
+
+            echo "=== Deployment complete ==="
+            docker ps --filter "name=fastapi-app"
